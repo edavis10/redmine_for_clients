@@ -303,7 +303,13 @@ class MailHandler < ActionMailer::Base
 
   def self.find_user(sender_email, mail=nil)
     user = User.find_by_mail(sender_email)
-    Redmine::Hook.call_hook(:model_mail_handler_find_user, :user => user, :sender_email => sender_email, :email => mail)
+    hook_users = Redmine::Hook.call_hook(:model_mail_handler_find_user, :user => user, :sender_email => sender_email, :email => mail)
+
+    # Extract any users from the hooks
+    if user.nil?
+      user = hook_users.select {|u| u.present? && u.is_a?(Principal) }.first
+    end
+
     user
   end
   
