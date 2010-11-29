@@ -543,7 +543,7 @@ class Issue < ActiveRecord::Base
         @time_entry.project = project
         @time_entry.issue = self
         @time_entry.user = User.current
-        @time_entry.spent_on = Date.today
+        @time_entry.spent_on = User.current.today
         @time_entry.attributes = params[:time_entry]
         self.time_entries << @time_entry
       end

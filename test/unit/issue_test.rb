@@ -813,4 +813,43 @@ class IssueTest < ActiveSupport::TestCase
     end
 
   end
+
+  context "#save_issue_with_child_records" do
+    setup do
+      @issue = Issue.spawn
+      @issue.project = @project = Project.generate!
+      @issue.tracker = @project.trackers.first
+      assert @issue.valid?
+
+      User.current = @user = User.find(1)
+    end
+    
+    should "log time using the user's time zone" do
+      pref = @user.pref
+      pref.time_zone = 'Alaska'
+      assert pref.save
+
+      assert_equal 'Alaska', @user.time_zone.name
+
+      real_today = Date.today
+      Date.stubs(:today).returns(real_today.end_of_day + 1.minute)
+      
+      params = {
+        :time_entry => {
+          :hours => 10,
+          :activity_id => TimeEntryActivity.first.id,
+          :comments => 'timezone'
+        }
+      }
+
+      assert_difference('TimeEntry.count') do
+        assert @issue.save_issue_with_child_records(params)
+      end
+
+      time_entry = TimeEntry.last(:conditions => {:comments => 'timezone'})
+      assert_equal real_today, time_entry.spent_on, "TimeEntry not created using time zone"
+
+    end
+    
+  end
 end
