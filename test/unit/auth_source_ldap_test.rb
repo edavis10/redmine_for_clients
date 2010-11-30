@@ -74,6 +74,30 @@ class AuthSourceLdapTest < ActiveSupport::TestCase
       end
       
     end
+
+    context "failover" do
+      setup do
+        @auth = AuthSourceLdap.find(1)
+        @auth.failover_host = '127.0.0.1'
+        @auth.host = '192.168.255.0' # unroutable
+        @auth.save!
+        @auth.reload
+      end
+      
+      should "connect to the failover host if the main one doesn't respond" do
+        assert_nothing_raised do
+          @auth.test_connection
+        end
+      end
+
+      should "work on authentication" do
+        assert_nothing_raised do
+          @auth.authenticate('example1','123456')
+        end
+      end
+      
+    end
+    
   else
     puts '(Test LDAP server not configured)'
   end

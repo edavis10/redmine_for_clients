@@ -29,6 +29,7 @@ class AuthSourceLdap < AuthSource
   
   def after_initialize
     self.port = 389 if self.port == 0
+    @failover = false
   end
   
   def authenticate(login, password)
@@ -48,7 +49,13 @@ class AuthSourceLdap < AuthSource
     ldap_con = initialize_ldap_con(self.account, self.account_password)
     ldap_con.open { }
   rescue  Net::LDAP::LdapError => text
-    raise "LdapError: " + text
+    if allow_failover? && !failover_triggered?
+      puts "AuthSourceLdap: LDAP server #{self.host} is not responding, failing over to #{self.failover_host}"
+      failover!
+      retry
+    else
+      raise "LdapError: " + text
+    end
   end
  
   def auth_method_name
@@ -64,7 +71,7 @@ class AuthSourceLdap < AuthSource
   end
   
   def initialize_ldap_con(ldap_user, ldap_password)
-    options = { :host => self.host,
+    options = { :host => current_host,
                 :port => self.port,
                 :encryption => (self.tls ? :simple_tls : nil)
               }
@@ -120,6 +127,28 @@ class AuthSourceLdap < AuthSource
     end
 
     attrs
+  end
+
+  def allow_failover?
+    failover_host.present?
+  end
+  
+  # Has an failover been triggered yet?
+  def failover_triggered?
+    @failover
+  end
+
+  # Mark the main server as failed
+  def failover!
+    @failover = true
+  end
+
+  def current_host
+    if failover_triggered?
+      self.failover_host
+    else
+      self.host
+    end
   end
   
   def self.get_attr(entry, attr_name)

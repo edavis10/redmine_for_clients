@@ -4,6 +4,7 @@ auth_sources_001:
   type: AuthSourceLdap
   name: 'LDAP test server'
   host: '127.0.0.1'
+  failover_host: ''
   port: 389
   base_dn: 'OU=Person,DC=redmine,DC=org'
   attr_login: uid
