@@ -42,8 +42,7 @@ class AuthSourceLdap < AuthSource
     end
   rescue  Net::LDAP::LdapError => text
     if allow_failover? && !failover_triggered?
-      puts "AuthSourceLdap: LDAP server #{self.host} is not responding, failing over to #{self.failover_host}"
-      failover!
+      try_to_failover_and_log
       retry
     else
       raise "LdapError: " + text
@@ -56,8 +55,7 @@ class AuthSourceLdap < AuthSource
     ldap_con.open { }
   rescue  Net::LDAP::LdapError => text
     if allow_failover? && !failover_triggered?
-      puts "AuthSourceLdap: LDAP server #{self.host} is not responding, failing over to #{self.failover_host}"
-      failover!
+      try_to_failover_and_log
       retry
     else
       raise "LdapError: " + text
@@ -155,6 +153,11 @@ class AuthSourceLdap < AuthSource
     else
       self.host
     end
+  end
+
+  def try_to_failover_and_log
+    puts "AuthSourceLdap: LDAP server #{self.host} is not responding, failing over to #{self.failover_host}"
+    failover!
   end
   
   def self.get_attr(entry, attr_name)
