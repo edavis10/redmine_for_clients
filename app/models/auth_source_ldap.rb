@@ -156,7 +156,7 @@ class AuthSourceLdap < AuthSource
   end
 
   def try_to_failover_and_log
-    puts "AuthSourceLdap: LDAP server #{self.host} is not responding, failing over to #{self.failover_host}"
+    logger.debug "AuthSourceLdap: LDAP server #{self.host} is not responding, failing over to #{self.failover_host}"
     failover!
   end
   
