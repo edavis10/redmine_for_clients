@@ -41,7 +41,13 @@ class AuthSourceLdap < AuthSource
       return attrs.except(:dn)
     end
   rescue  Net::LDAP::LdapError => text
-    raise "LdapError: " + text
+    if allow_failover? && !failover_triggered?
+      puts "AuthSourceLdap: LDAP server #{self.host} is not responding, failing over to #{self.failover_host}"
+      failover!
+      retry
+    else
+      raise "LdapError: " + text
+    end
   end
 
   # test the connection to the LDAP
