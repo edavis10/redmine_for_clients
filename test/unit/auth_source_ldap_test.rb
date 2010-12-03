@@ -79,7 +79,7 @@ class AuthSourceLdapTest < ActiveSupport::TestCase
       setup do
         @auth = AuthSourceLdap.find(1)
         @auth.failover_host = '127.0.0.1'
-        @auth.host = '192.168.255.0' # unroutable
+        @auth.host = '127.0.0.0' # unroutable and returns fast
         @auth.save!
         @auth.reload
       end
