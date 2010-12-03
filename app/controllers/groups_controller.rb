@@ -130,12 +130,6 @@ class GroupsController < ApplicationController
     end
   end
   
-  def autocomplete_for_user
-    @group = Group.find(params[:id])
-    @users = User.active.like(params[:q]).find(:all, :limit => 100) - @group.users
-    render :layout => false
-  end
-  
   def edit_membership
     @group = Group.find(params[:id])
     @membership = Member.edit_membership(params[:membership_id], params[:membership], @group)

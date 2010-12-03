@@ -1,5 +1,7 @@
 class AutoCompletesController < ApplicationController
-  before_filter :find_project
+  before_filter :find_project, :only => :issues
+
+  helper :custom_fields
   
   def issues
     @issues = []
@@ -13,6 +15,13 @@ class AutoCompletesController < ApplicationController
     render :layout => false
   end
 
+  def users
+    @group = Group.find(params[:id])
+    @users = User.active.like(params[:q]).find(:all, :limit => 100) - @group.users
+    render :layout => false
+
+  end
+  
   private
 
   def find_project
