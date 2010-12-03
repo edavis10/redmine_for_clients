@@ -254,6 +254,7 @@ en:
   field_version: Version
   field_type: Type
   field_host: Host
+  field_failover_host: Failover Host
   field_port: Port
   field_account: Account
   field_base_dn: Base DN
