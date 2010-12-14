@@ -213,6 +213,14 @@ class Issue < ActiveRecord::Base
   def estimated_hours=(h)
     write_attribute :estimated_hours, (h.is_a?(String) ? h.to_hours : h)
   end
+
+  def start_date=(v)
+    write_attribute(:start_date, v) if leaf?
+  end
+
+  def due_date=(v)
+    write_attribute(:due_date, v) if leaf?
+  end
   
   SAFE_ATTRIBUTES = %w(
     tracker_id
@@ -602,6 +610,23 @@ class Issue < ActiveRecord::Base
     end
   end
 
+  # start/due dates = lowest/highest dates of children
+  #
+  # Only used by parent issues
+  def recalculate_start_and_due_date
+    unless leaf?
+      # Use write_attribute to bypass the setter since we are forcing the values
+      write_attribute(:start_date, children.minimum(:start_date))
+      write_attribute(:due_date, children.maximum(:due_date))
+
+      # Swap start and due dates
+      # TODO: Why is this needed? Feels random. Commit:8e3d1b69
+      if start_date && due_date && due_date < start_date
+        start_date, due_date = due_date, start_date
+      end
+    end
+  end
+  
   # Extracted from the ReportsController.
   def self.by_tracker(project)
     count_and_group_by(:project => project,
@@ -728,13 +753,8 @@ class Issue < ActiveRecord::Base
       if priority_position = p.children.maximum("#{IssuePriority.table_name}.position", :include => :priority)
         p.priority = IssuePriority.find_by_position(priority_position)
       end
-      
-      # start/due dates = lowest/highest dates of children
-      p.start_date = p.children.minimum(:start_date)
-      p.due_date = p.children.maximum(:due_date)
-      if p.start_date && p.due_date && p.due_date < p.start_date
-        p.start_date, p.due_date = p.due_date, p.start_date
-      end
+
+      p.recalculate_start_and_due_date
       
       # done ratio = weighted average ratio of leaves
       unless Issue.use_status_for_done_ratio? && p.status && p.status.default_done_ratio
@@ -758,7 +778,7 @@ class Issue < ActiveRecord::Base
       p.save(false)
     end
   end
-  
+
   def destroy_children
     unless leaf?
       children.each do |child|

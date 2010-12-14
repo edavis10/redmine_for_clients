@@ -234,12 +234,55 @@ class IssueNestedSetTest < ActiveSupport::TestCase
     parent = create_issue!
     create_issue!(:start_date => '2010-01-25', :due_date => '2010-02-15', :parent_issue_id => parent.id)
     create_issue!(                             :due_date => '2010-02-13', :parent_issue_id => parent.id)
-    create_issue!(:start_date => '2010-02-01', :due_date => '2010-02-22', :parent_issue_id => parent.id)
+    sub_issue = create_issue!(:start_date => '2010-02-01', :due_date => '2010-02-22', :parent_issue_id => parent.id)
+    create_issue!(:start_date => '2010-02-01', :due_date => '2010-02-26', :parent_issue_id => sub_issue.id)
     parent.reload
     assert_equal Date.parse('2010-01-25'), parent.start_date
-    assert_equal Date.parse('2010-02-22'), parent.due_date
+    assert_equal Date.parse('2010-02-26'), parent.due_date
+  end
+
+  def test_parent_with_dates_before_adding_children_should_be_cleared
+    parent = create_issue!(:start_date => '2010-01-01', :due_date => '2010-12-31')
+    assert_equal Date.parse('2010-01-01'), parent.start_date
+    assert_equal Date.parse('2010-12-31'), parent.due_date
+
+    create_issue!(:parent_issue_id => parent.id)
+
+    parent.reload
+    assert_equal nil, parent.start_date
+    assert_equal nil, parent.due_date
+
   end
   
+  def test_changing_child_date_should_update_parent
+    parent = create_issue!
+    sub_issue = create_issue!(:parent_issue_id => parent.id)
+    create_issue!(:parent_issue_id => sub_issue.id, :start_date => '2010-01-01', :due_date => '2010-12-31')
+
+    parent.reload
+    assert_equal Date.parse('2010-01-01'), parent.start_date
+    assert_equal Date.parse('2010-12-31'), parent.due_date
+
+  end
+
+  def test_changing_parent_date_should_not_be_allowed
+    parent = create_issue!
+    sub_issue = create_issue!(:parent_issue_id => parent.id)
+    create_issue!(:parent_issue_id => sub_issue.id, :start_date => '2010-01-01', :due_date => '2010-12-31')
+
+    parent.reload
+    assert_equal Date.parse('2010-01-01'), parent.start_date
+    assert_equal Date.parse('2010-12-31'), parent.due_date
+
+    parent.start_date = '2010-02-02'
+    parent.due_date = '2012-10-01'
+    assert parent.save
+    parent.reload
+
+    assert_equal Date.parse('2010-01-01'), parent.start_date
+    assert_equal Date.parse('2010-12-31'), parent.due_date
+  end
+
   def test_parent_done_ratio_should_be_average_done_ratio_of_leaves
     parent = create_issue!
     create_issue!(:done_ratio => 20, :parent_issue_id => parent.id)
