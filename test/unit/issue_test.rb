@@ -813,4 +813,43 @@ class IssueTest < ActiveSupport::TestCase
     end
 
   end
+
+  context "Issue#save with a change to the issue description" do
+    setup do
+      @project = Project.generate!
+      @issue = Issue.generate_for_project!(@project, :description => 'This is the old description')
+      @issue.reload
+      @issue.init_journal(User.generate!)
+    end
+    
+    should "create a new journal" do
+      assert_difference('Journal.count') do
+        @issue.description = 'This is the new description'
+        assert @issue.save
+      end
+    end
+    
+    should "add the old description to the journal details" do
+      @issue.description = 'This is the new description'
+      assert @issue.save
+
+      journal = @issue.reload.journals.last
+      assert_equal 1, journal.details.length
+      journal_detail = journal.details.first 
+      assert_equal 'attr', journal_detail.property
+      assert_equal 'This is the old description', journal_detail.old_value
+    end
+    
+    should "add the new description to the journal details" do
+      @issue.description = 'This is the new description'
+      assert @issue.save
+
+      journal = @issue.reload.journals.last
+      assert_equal 1, journal.details.length
+      journal_detail = journal.details.first 
+      assert_equal 'attr', journal_detail.property
+      assert_equal 'This is the new description', journal_detail.value
+    end
+  end
+  
 end

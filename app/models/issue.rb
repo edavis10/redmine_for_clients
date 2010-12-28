@@ -834,7 +834,7 @@ class Issue < ActiveRecord::Base
   def create_journal
     if @current_journal
       # attributes changes
-      (Issue.column_names - %w(id description root_id lft rgt lock_version created_on updated_on)).each {|c|
+      (Issue.column_names - %w(id root_id lft rgt lock_version created_on updated_on)).each {|c|
         @current_journal.details << JournalDetail.new(:property => 'attr',
                                                       :prop_key => c,
                                                       :old_value => @issue_before_change.send(c),
