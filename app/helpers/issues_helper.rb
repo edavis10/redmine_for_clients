@@ -135,7 +135,7 @@ module IssuesHelper
         label = l(:field_parent_issue)
         value = "##{detail.value}" unless detail.value.blank?
         old_value = "##{detail.old_value}" unless detail.old_value.blank?
-      when 'description'
+      when detail.prop_key == 'description'
         # Truncate description.  TODO: would be better to be able to 'diff' the descriptions
         value = h(truncate(detail.value, :length => 80))
         old_value = h(truncate(detail.old_value, :length => 80))
