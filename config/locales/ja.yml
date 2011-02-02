@@ -952,3 +952,5 @@ ja:
   enumeration_doc_categories: 文書カテゴリ
   enumeration_activities: 作業分類 (時間トラッキング)
   enumeration_system_activity: システム作業分類
+  setting_mail_handler_confirmation_on_success: Send confirmation email on successful incoming email
+  setting_mail_handler_confirmation_on_failure: Send confirmation email on failed incoming email

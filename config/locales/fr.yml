@@ -945,3 +945,5 @@ fr:
   field_assigned_to_role: Rôle de l'assigné
   field_start_date: Start date
   setting_emails_header: Emails header
+  setting_mail_handler_confirmation_on_success: Send confirmation email on successful incoming email
+  setting_mail_handler_confirmation_on_failure: Send confirmation email on failed incoming email

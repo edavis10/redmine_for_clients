@@ -923,3 +923,5 @@ sl:
   label_user_search: "Search for user:"
   field_visible: Visible
   setting_emails_header: Emails header
+  setting_mail_handler_confirmation_on_success: Send confirmation email on successful incoming email
+  setting_mail_handler_confirmation_on_failure: Send confirmation email on failed incoming email

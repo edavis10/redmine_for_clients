@@ -1013,3 +1013,5 @@
   enumeration_activities: 活動 (時間追蹤)
   enumeration_system_activity: 系統活動
 
+  setting_mail_handler_confirmation_on_success: Send confirmation email on successful incoming email
+  setting_mail_handler_confirmation_on_failure: Send confirmation email on failed incoming email

@@ -354,6 +354,8 @@ en:
   setting_rest_api_enabled: Enable REST web service
   setting_cache_formatted_text: Cache formatted text
   setting_default_notification_option: Default notification option
+  setting_mail_handler_confirmation_on_success: "Send confirmation email on successful incoming email"
+  setting_mail_handler_confirmation_on_failure: "Send confirmation email on failed incoming email"
   
   permission_add_project: Create project
   permission_add_subprojects: Create subprojects
