@@ -273,6 +273,9 @@ class Mailer < ActionMailer::Base
     when object.class == Journal
       project = object.project.name
       url = url_for(:controller => 'issues', :action => 'show', :id => object.issue.id)
+    when object.class == Message
+      project = object.project.name
+      url = url_for(object.event_url)
     else
       project = ''
       url = ''
