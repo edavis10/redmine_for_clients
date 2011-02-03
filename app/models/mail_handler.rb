@@ -155,6 +155,7 @@ class MailHandler < ActionMailer::Base
     add_attachments(issue)
     issue.save!
     logger.info "MailHandler: issue ##{issue.id} updated by #{user}" if logger && logger.info
+    Mailer.deliver_mail_handler_confirmation(journal, user, email.subject) if Setting.mail_handler_confirmation_on_success
     journal
   end
   

@@ -314,7 +314,7 @@ class MailHandlerTest < ActiveSupport::TestCase
     ActionMailer::Base.deliveries.clear
     journal = submit_email('ticket_reply.eml')
     assert journal.is_a?(Journal)
-    assert_equal 1, ActionMailer::Base.deliveries.size
+    assert_equal 2, ActionMailer::Base.deliveries.size
   end
   
   def test_reply_to_a_message
@@ -444,7 +444,17 @@ class MailHandlerTest < ActiveSupport::TestCase
   end
 
   context "#receive_issue_reply" do
-    should "deliver an email confirmation when configured"
+    should "deliver an email confirmation when configured" do
+      journal = submit_email('ticket_reply.eml')
+
+      assert_equal 2, ActionMailer::Base.deliveries.size
+      mail = ActionMailer::Base.deliveries.last
+      assert_not_nil mail
+      assert mail.subject.include?('[eCookbook]'), "Project name missing"
+      assert mail.subject.include?('Confirmation of email submission: Re: Add ingredients categories'), "Main subject missing"
+      assert mail.body.include?("/issues/2"), "Link to issue missing"
+    end
+    
   end
 
   context "#receive_message_reply" do
