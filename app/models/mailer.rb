@@ -294,6 +294,13 @@ class Mailer < ActionMailer::Base
     render_multipart('mail_handler_unauthorized_action', body)
   end
   
+  def mail_handler_missing_information(user, email_subject, error_message)
+    recipients user.mail
+    subject l(:label_mail_handler_failure, :subject => email_subject)
+    body({:errors => error_message.to_s})
+    render_multipart('mail_handler_missing_information', body)
+  end
+
   def test(user)
     set_language_if_valid(user.language)
     recipients user.mail

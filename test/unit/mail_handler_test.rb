@@ -461,6 +461,23 @@ class MailHandlerTest < ActiveSupport::TestCase
     end
   end
 
+  context "with an email that is missing required information" do
+    should "deliver an email error confirmation to the sender for a missing project" do
+      ActionMailer::Base.deliveries.clear
+      issue = submit_email('ticket_with_attachment.eml') # No project set
+      assert_equal false, issue
+      
+      assert_equal 1, ActionMailer::Base.deliveries.size
+      mail = ActionMailer::Base.deliveries.last
+      assert_not_nil mail
+      assert mail.bcc.include?('jsmith@somenet.foo')
+      assert mail.subject.include?('Failed email submission: Ticket created by email with attachment')
+      assert mail.body.include?('There were errors with your email submission')
+      assert mail.body.include?('Unable to determine target project')
+
+    end
+  end
+
   context "#receive_issue" do
     should "deliver an email confirmation when configured" do
       ActionMailer::Base.deliveries.clear
