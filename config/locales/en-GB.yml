@@ -153,6 +153,7 @@ en-GB:
   notice_file_not_found: The page you were trying to access doesn't exist or has been removed.
   notice_locking_conflict: Data has been updated by another user.
   notice_not_authorized: You are not authorised to access this page.
+  notice_not_authorized_action: You are not authorized to perform this action.
   notice_email_sent: "An email was sent to {{value}}"
   notice_email_error: "An error occurred while sending mail ({{value}})"
   notice_feeds_access_key_reseted: Your RSS access key was reset.
@@ -761,6 +762,9 @@ en-GB:
   label_api_access_key: API access key
   label_missing_api_access_key: Missing an API access key
   label_api_access_key_created_on: "API access key created {{value}} ago"
+  label_mail_handler_confirmation: "Confirmation of email submission: {{subject}}"
+  label_mail_handler_failure: "Failed email submission: {{subject}}"
+  label_mail_handler_errors_with_submission: "There were errors with your email submission:"
   
   button_login: Login
   button_submit: Submit
@@ -871,6 +875,7 @@ en-GB:
   text_wiki_page_destroy_children: "Delete child pages and all their descendants"
   text_wiki_page_reassign_children: "Reassign child pages to this parent page"
   text_own_membership_delete_confirmation: "You are about to remove some or all of your permissions and may no longer be able to edit this project after that.\nAre you sure you want to continue?"
+  text_mail_handler_confirmation_successful: "Your email has been successful added at the following url"
   
   default_role_manager: Manager
   default_role_developer: Developer
