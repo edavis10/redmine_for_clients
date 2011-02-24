@@ -26,7 +26,7 @@ hr {
 </head>
 <body>
 <span class="header"><%= Redmine::WikiFormatting.to_html(Setting.text_formatting, Setting.emails_header) %></span>
-<%= call_hook(:view_layouts_mailer_html_after_content, self.assigns) %>
+<%= call_hook(:view_layouts_mailer_html_before_content, self.assigns) %>
 <%= yield %>
 <%= call_hook(:view_layouts_mailer_html_after_content, self.assigns) %>
 <hr />
