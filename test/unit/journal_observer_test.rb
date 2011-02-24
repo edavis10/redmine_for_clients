@@ -33,7 +33,7 @@ class JournalObserverTest < ActiveSupport::TestCase
     journal = issue.init_journal(user, issue)
 
     assert journal.save
-    assert_equal 1, ActionMailer::Base.deliveries.size
+    assert_equal 2, ActionMailer::Base.deliveries.size
   end
 
   def test_create_should_not_send_email_notification_without_issue_updated
@@ -55,7 +55,7 @@ class JournalObserverTest < ActiveSupport::TestCase
     journal.notes = 'This update has a note'
 
     assert journal.save
-    assert_equal 1, ActionMailer::Base.deliveries.size
+    assert_equal 2, ActionMailer::Base.deliveries.size
   end
 
   def test_create_should_not_send_email_notification_without_issue_note_added
@@ -78,7 +78,7 @@ class JournalObserverTest < ActiveSupport::TestCase
     issue.status = IssueStatus.last
 
     assert issue.save
-    assert_equal 1, ActionMailer::Base.deliveries.size
+    assert_equal 2, ActionMailer::Base.deliveries.size
   end
 
   def test_create_should_not_send_email_notification_without_issue_status_updated
@@ -101,7 +101,7 @@ class JournalObserverTest < ActiveSupport::TestCase
     issue.priority = IssuePriority.last
 
     assert issue.save
-    assert_equal 1, ActionMailer::Base.deliveries.size
+    assert_equal 2, ActionMailer::Base.deliveries.size
   end
 
   def test_create_should_not_send_email_notification_without_issue_priority_updated

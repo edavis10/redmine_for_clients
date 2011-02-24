@@ -311,7 +311,7 @@ class MailHandlerTest < ActiveSupport::TestCase
     ActionMailer::Base.deliveries.clear
     journal = submit_email('ticket_reply.eml')
     assert journal.is_a?(Journal)
-    assert_equal 1, ActionMailer::Base.deliveries.size
+    assert_equal 3, ActionMailer::Base.deliveries.size
   end
   
   def test_reply_to_a_message

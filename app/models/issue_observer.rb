@@ -17,6 +17,10 @@
 
 class IssueObserver < ActiveRecord::Observer
   def after_create(issue)
-    Mailer.deliver_issue_add(issue) if Setting.notified_events.include?('issue_added')
+    if Setting.notified_events.include?('issue_added')
+      (issue.recipients + issue.watcher_recipients).uniq.each do |recipient|
+        Mailer.deliver_issue_add(issue, recipient)
+      end
+    end
   end
 end
