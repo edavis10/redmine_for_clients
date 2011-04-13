@@ -22,6 +22,12 @@ class AuthSource < ActiveRecord::Base
   validates_uniqueness_of :name
   validates_length_of :name, :maximum => 60
 
+  serialize :options, Hash
+
+  def after_initialize
+    self.options ||= {}
+  end
+
   def authenticate(login, password)
   end
   

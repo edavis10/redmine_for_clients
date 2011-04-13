@@ -30,7 +30,7 @@ class AuthSourceLdap < AuthSource
   validates_numericality_of :port, :only_integer => true
   
   before_validation :strip_ldap_attributes
-  
+
   def after_initialize
     self.port = 389 if self.port == 0
     @failover = false
@@ -76,8 +76,41 @@ class AuthSourceLdap < AuthSource
     "LDAP"
   end
 
+  # Skip the primary host until after this time
+  def failover_until
+    if options.present? && options[:failover_until].present?
+      options[:failover_until]
+    else
+      nil
+    end
+  end
+
+  # Is the server in a cached failover mode?
+  def in_cached_failover?
+    failover_until && Time.now <= failover_until
+  end
+  
+  # Has an failover been triggered yet?
+  def failover_triggered?
+    @failover || in_cached_failover?
+  end
+
+  # Which host is currently being used
+  def current_host
+    if failover_triggered?
+      self.failover_host
+    else
+      self.host
+    end
+  end
+
   def self.timeout_length
     10
+  end
+
+  # How many minutes should the failover be cached for
+  def self.failover_cache_time
+    20
   end
   
   private
@@ -151,22 +184,12 @@ class AuthSourceLdap < AuthSource
     failover_host.present?
   end
   
-  # Has an failover been triggered yet?
-  def failover_triggered?
-    @failover
-  end
-
   # Mark the main server as failed
   def failover!
     @failover = true
-  end
-
-  def current_host
-    if failover_triggered?
-      self.failover_host
-    else
-      self.host
-    end
+    self.options ||= {}
+    self.options[:failover_until] = 20.minutes.from_now
+    save
   end
 
   def try_to_failover_and_log

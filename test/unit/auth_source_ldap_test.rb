@@ -97,6 +97,47 @@ class AuthSourceLdapTest < ActiveSupport::TestCase
       end
       
     end
+
+    context "failover cache" do
+      setup do
+        @auth = AuthSourceLdap.find(1)
+        @auth.failover_host = '127.0.0.1'
+        @auth.host = '127.0.0.0' # unroutable and returns fast
+        @auth.save!
+        @auth.reload
+      end
+      
+      should "cache when a server hit failover for 20 minutes" do
+        failed_time = Time.now
+        @auth.test_connection
+        
+        @auth.reload
+
+        assert @auth.failover_until.present?, "Failover not cached"
+        # Roughly within 20-22 minutes form now
+        assert @auth.failover_until >= failed_time + 20.minutes
+        assert @auth.failover_until < failed_time + 22.minutes
+      end
+      
+      should "skip the primary LDAP server until the cache is cleared" do
+        @auth.send('failover!') # Trigger the failover
+        @auth = AuthSourceLdap.find(@auth.id)
+
+        assert @auth.failover_triggered?
+        assert_equal "127.0.0.1", @auth.current_host
+      end
+      
+      should "retry the primary server after the cache is cleared" do
+        @auth.options ||= {}
+        @auth.options[:failover_until] = 1.minute.ago
+        @auth.save
+        @auth = AuthSourceLdap.find(@auth.id)
+
+        assert !@auth.failover_triggered?
+        assert_equal "127.0.0.0", @auth.current_host
+      end
+
+    end
     
   else
     puts '(Test LDAP server not configured)'
