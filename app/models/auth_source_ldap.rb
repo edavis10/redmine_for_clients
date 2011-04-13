@@ -18,6 +18,10 @@
 require 'net/ldap'
 require 'iconv'
 
+# Ruby's timeout.rb isn't the best timeout an operation but since we
+# are only using it on login (a blocking event), it's good enough.
+require 'timeout'
+
 class AuthSourceLdap < AuthSource 
   validates_presence_of :host, :port, :attr_login
   validates_length_of :name, :host, :account_password, :maximum => 60, :allow_nil => true
@@ -34,12 +38,16 @@ class AuthSourceLdap < AuthSource
   
   def authenticate(login, password)
     return nil if login.blank? || password.blank?
-    attrs = get_user_dn(login)
-    
-    if attrs && attrs[:dn] && authenticate_dn(attrs[:dn], password)
-      logger.debug "Authentication successful for '#{login}'" if logger && logger.debug?
-      return attrs.except(:dn)
-    end
+
+    Timeout::timeout(self.class.timeout_length, Net::LDAP::LdapError) {
+      attrs = get_user_dn(login)
+
+      if attrs && attrs[:dn] && authenticate_dn(attrs[:dn], password)
+        logger.debug "Authentication successful for '#{login}'" if logger && logger.debug?
+        return attrs.except(:dn)
+      end
+
+    }
   rescue  Net::LDAP::LdapError => text
     if allow_failover? && !failover_triggered?
       try_to_failover_and_log
@@ -51,8 +59,10 @@ class AuthSourceLdap < AuthSource
 
   # test the connection to the LDAP
   def test_connection
-    ldap_con = initialize_ldap_con(self.account, self.account_password)
-    ldap_con.open { }
+    Timeout::timeout(self.class.timeout_length, Net::LDAP::LdapError) {
+      ldap_con = initialize_ldap_con(self.account, self.account_password)
+      ldap_con.open { }
+    }
   rescue  Net::LDAP::LdapError => text
     if allow_failover? && !failover_triggered?
       try_to_failover_and_log
@@ -64,6 +74,10 @@ class AuthSourceLdap < AuthSource
  
   def auth_method_name
     "LDAP"
+  end
+
+  def self.timeout_length
+    10
   end
   
   private
