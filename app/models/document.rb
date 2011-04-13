@@ -25,6 +25,7 @@ class Document < ActiveRecord::Base
                 :author => Proc.new {|o| (a = o.attachments.find(:first, :order => "#{Attachment.table_name}.created_on ASC")) ? a.author : nil },
                 :url => Proc.new {|o| {:controller => 'documents', :action => 'show', :id => o.id}}
   acts_as_activity_provider :find_options => {:include => :project}
+  acts_as_watchable
   
   validates_presence_of :project, :title, :category
   validates_length_of :title, :maximum => 60
@@ -45,5 +46,11 @@ class Document < ActiveRecord::Base
       @updated_on = (a && a.created_on) || created_on
     end
     @updated_on
+  end
+
+  def recipients
+    mails = super # from acts_as_event
+    mails += watcher_recipients
+    mails.uniq
   end
 end
